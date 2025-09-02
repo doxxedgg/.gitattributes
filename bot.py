@@ -12,7 +12,7 @@ webhook_pfp = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2
 spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
 guild_name = "JHUB ON TOP"
 guild_icon = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2b8458d4f1cfb539b5cb03c.gif?size=96"
-channels_to_create = 40
+channels_to_create = 15
 pings_per_channel = 100
 
 intents = discord.Intents.all()
