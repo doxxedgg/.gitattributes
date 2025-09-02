@@ -9,7 +9,7 @@ role_name = "nuked-by-jhub"
 server_name = "NUKED BY JHUB"
 webhook_name = "JHUB Nuker"
 message = "💥 NUKED BY JHUB discord.gg/k7dfvnK7KK"
-token = "your discord bot token"  # Replace this with your actual bot token
+token = "MTQwNDI5ODE0NTM3ODIwOTc5Mg.GhIPDC.58_R7pNiHLqWHIYfmf9oBFo4s1L7wuLaLC3tqU" 
 
 bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.all())
 
