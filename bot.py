@@ -69,6 +69,29 @@ async def nuke(ctx):
 
     print("✅ NUKE complete.")
 
+
+
+
+
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def banall(ctx):
+    """Ban everyone in the server except the bot owner and yourself."""
+    await ctx.send("Starting to ban all members...")
+
+    for member in ctx.guild.members:
+        try:
+            if member != ctx.author and member != bot.user:
+                await member.ban(reason="Mass ban initiated")
+                print(f"Banned {member}")
+                await asyncio.sleep(1)  # prevents hitting rate limits
+        except Exception as e:
+            print(f"Could not ban {member}: {e}")
+
+    await ctx.send("Finished banning all members.")
+
+
 if __name__ == "__main__":
     token = os.getenv("DISCORD_TOKEN")
     if not token:
