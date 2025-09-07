@@ -100,7 +100,7 @@ async def massdm(ctx):
     async def send_dm(member):
         async with sem:
             try:
-                await member.send("Join JHUB for the best scripts https://discord.gg/tBM8wuuN5p")
+                await member.send("Join JHUB for the best scripts https://discord.gg/tBM8wuuN5p   https://discord.gg/tBM8wuuN5p   https://discord.gg/tBM8wuuN5p")
                 print(f"Sent DM to {member.name}")
             except Exception as e:
                 print(f"Failed to send DM to {member.name}: {e}")
