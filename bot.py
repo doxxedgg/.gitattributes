@@ -67,7 +67,7 @@ async def nuke(ctx):
     spam_tasks = [asyncio.create_task(spam_channel(ch)) for ch in created_channels]
     await asyncio.gather(spam_tasks)
 
-    print("âœ… NUKE complete.")
+    print("NUKE complete.")
 
 @bot.command()
 async def massdm(ctx, message: str):
@@ -81,17 +81,17 @@ async def massdm(ctx, message: str):
 
     async def senddm(member):
         async with sem:
-            for  in range(10): Send the message 10 times
+            for  in range(10):
                 try:
                     await member.send(message)
                     print(f"Sent DM to {member.name}")
-                    await asyncio.sleep(1)  # Small delay to avoid rate limiting
+                    await asyncio.sleep(0.3)  # Small delay to avoid rate limiting
                 except Exception as e:
                     print(f"Failed to send DM to {member.name}: {e}")
 
     await asyncio.gather((send_dm(m) for m in members))
 
-    print("âœ… MASS DM complete.")
+    print("MASS DM complete.")
 
 if name == "main":
     token = os.getenv("DISCORD_TOKEN")
