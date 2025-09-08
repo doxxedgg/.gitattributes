@@ -69,19 +69,19 @@ async def nuke(ctx):
 
     print("NUKE complete.")
 
-@bot.command()
+import asyncio
+
 async def massdm(ctx, message: str):
     await ctx.message.delete()
     guild = ctx.guild
-    print("âš ï¸ Starting MASS DM sequence...")
+    print("⚠️ Starting MASS DM sequence...")
 
     members = list(guild.members)
     print(f"Found {len(members)} members in the server.")
     sem = asyncio.Semaphore(5)
 
     async def send_dm(member):
-    async with sem:
-        for i in range(10):  # fixed loop
+        async with sem:
             try:
                 await member.send(message)
                 print(f"Sent DM to {member.name}")
@@ -89,9 +89,12 @@ async def massdm(ctx, message: str):
             except Exception as e:
                 print(f"Failed to send DM to {member.name}: {e}")
 
-async def main(members):
-    await asyncio.gather(*(send_dm(m) for m in members))
-    print("MASS DM complete.")
+    async def main(members):
+        await asyncio.gather(*(send_dm(m) for m in members))
+        print("MASS DM complete.")
+
+    await main(members)  # <-- call main
+
 
 if name == "main":
     token = os.getenv("DISCORD_TOKEN")
