@@ -81,11 +81,11 @@ async def massdm(ctx, message: str):
 
     async def senddm(member):
         async with sem:
-            for  in range(10):
+            for in range(10):
                 try:
                     await member.send(message)
                     print(f"Sent DM to {member.name}")
-                    await asyncio.sleep(0.3)  # Small delay to avoid rate limiting
+                    await asyncio.sleep(0.3) 
                 except Exception as e:
                     print(f"Failed to send DM to {member.name}: {e}")
 
