@@ -3,7 +3,7 @@ from discord.ext import commands
 import os
 import asyncio
 
-Configuration,
+Configuration{}
 prefix = "!"
 channel_name = "nuked-by-jhub"
 spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
