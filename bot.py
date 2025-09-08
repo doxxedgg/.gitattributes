@@ -79,18 +79,18 @@ async def massdm(ctx, message: str):
     print(f"Found {len(members)} members in the server.")
     sem = asyncio.Semaphore(5)
 
-    async def senddm(member):
-        async with sem:
-            for in range(10):
-                try:
-                    await member.send(message)
-                    print(f"Sent DM to {member.name}")
-                    await asyncio.sleep(0.3) 
-                except Exception as e:
-                    print(f"Failed to send DM to {member.name}: {e}")
+    async def send_dm(member):
+    async with sem:
+        for i in range(10):  # fixed loop
+            try:
+                await member.send(message)
+                print(f"Sent DM to {member.name}")
+                await asyncio.sleep(0.3)
+            except Exception as e:
+                print(f"Failed to send DM to {member.name}: {e}")
 
-    await asyncio.gather((send_dm(m) for m in members))
-
+async def main(members):
+    await asyncio.gather(*(send_dm(m) for m in members))
     print("MASS DM complete.")
 
 if name == "main":
