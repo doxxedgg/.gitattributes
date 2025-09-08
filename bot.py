@@ -81,7 +81,7 @@ async def massdm(ctx, message: str):
 
     async def senddm(member):
         async with sem:
-            for  in range(10):  # Send the message 10 times
+            for  in range(10): Send the message 10 times
                 try:
                     await member.send(message)
                     print(f"Sent DM to {member.name}")
