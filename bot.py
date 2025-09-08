@@ -70,7 +70,7 @@ async def nuke(ctx):
     print("âœ… NUKE complete.")
 
 @bot.command()
-async def massdm(ctx, , message: str):
+async def massdm(ctx, message: str):
     await ctx.message.delete()
     guild = ctx.guild
     print("âš ï¸ Starting MASS DM sequence...")
