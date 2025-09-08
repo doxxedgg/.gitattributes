@@ -96,9 +96,9 @@ async def massdm(ctx, message: str):
     await main(members)  # <-- call main
 
 
-if name == "main":
+if __name__ == "__main__":
     token = os.getenv("DISCORD_TOKEN")
     if not token:
-        print("âŒ Error: DISCORD_TOKEN environment variable not found.")
+        print("❌ Error: DISCORD_TOKEN environment variable not found.")
         exit(1)
     bot.run(token)
