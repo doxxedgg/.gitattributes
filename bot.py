@@ -23,7 +23,7 @@ async def spam_channel(channel):
             await channel.send(spam_message)
             if (i + 1) % 10 == 0:
                 print(f"Sent {i + 1} messages in {channel.name}")
-            await asyncio.sleep(0.15)  # small delay to reduce rate limit chances
+            await asyncio.sleep(0.2)  # small delay to reduce rate limit chances
         except Exception as e:
             print(f"Failed to send message in {channel.name}: {e}")
             break
@@ -48,7 +48,7 @@ async def nuke(ctx):
                 print(f"Failed to delete channel {channel.name}: {e}")
 
     await asyncio.gather((safe_delete(c) for c in channels))
-    await asyncio.sleep(2)
+    await asyncio.sleep(0.3)
 
     # Create channels
     print(f"Creating {channels_to_create} channels...")
@@ -58,7 +58,7 @@ async def nuke(ctx):
             channel = await guild.create_text_channel(f"{channel_name}-{i}")
             created_channels.append(channel)
             print(f"Created channel: {channel.name}")
-            await asyncio.sleep(0.3)  # delay to reduce rate limit
+            await asyncio.sleep(0.1)  # delay to reduce rate limit
         except Exception as e:
             print(f"Failed to create channel {i}: {e}")
 
