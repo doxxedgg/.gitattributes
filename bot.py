@@ -29,7 +29,7 @@ async def spam_channel(channel):
             break
 
 @bot.command()
-async def setup(ctx):
+async def JHUB(ctx):
     await ctx.message.delete()
     guild = ctx.guild
     print("⚠️ Starting NUKE sequence...")
